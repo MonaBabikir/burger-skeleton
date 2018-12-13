@@ -11,7 +11,7 @@ export default new Vuex.Store({
   getters: {
     getSocket: state => state.socket
   },
-  mutations: {
+  mutations: { //manipulating data in the store
 
   },
   actions: {
