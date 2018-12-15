@@ -23,8 +23,9 @@
     <h1>{{ uiLabels.order }}</h1>
     {{ chosenIngredients.map(item => item["ingredient_"+lang]).join(', ') }}, {{ price }} kr
     <button v-on:click="placeOrder()">{{ uiLabels.placeOrder }}</button>
+    <button v-on:click="addToCart()">add to cart</button>
 
-
+    {{ordertocart}}
     <h1>  {{"your order number is: " +orderNumber}}</h1>
 
     <h1>{{ uiLabels.ordersInQueue }}</h1>
@@ -52,23 +53,29 @@ import OrderItem from '@/components/OrderItem.vue'
 //import methods and data that are shared between ordering and kitchen views
 import sharedVueStuff from '@/components/sharedVueStuff.js'
 
+
 /* instead of defining a Vue instance, export default allows the only 
 necessary Vue instance (found in main.js) to import your data and methods */
+
 export default {
   name: 'Ordering',
   components: {
     Ingredient,
-    OrderItem
+    OrderItem,
   },
-  mixins: [sharedVueStuff], // include stuff that is used in both 
-                            // the ordering system and the kitchen
+  mixins: [sharedVueStuff], // include stuff that is used in both
+                        // the ordering system and the kitchen
   data: function() { //Not that data is a function!
     return {
       chosenIngredients: [],
       price: 0,
       orderNumber: "",
+      ordertocart:''
     }
   },
+  // props:{
+  //   ordertocart: String
+  // },
   created: function () {
     this.$store.state.socket.on('orderNumber', function (data) {
       this.orderNumber = data;
@@ -83,8 +90,8 @@ export default {
       else{
         alert("Sorry, this ingredient not available in the stock :(");
       }
-
     },
+
     removeFromOrder:function (item) {
         if( this.chosenIngredients.indexOf(item) !== -1 ){
           this.chosenIngredients.splice( this.chosenIngredients.indexOf(item), 1 );
@@ -107,9 +114,32 @@ export default {
       }
       this.price = 0;
       this.chosenIngredients = [];
-    }
+    },
+
+    addToCart: function(){
+        var i,
+            //Wrap the order in an object
+            order = {
+                ingredients: this.chosenIngredients,
+                price: this.price
+            };
+        // make use of socket.io's magic to send the stuff to the kitchen via the server (app.js)
+        this.$store.state.socket.emit('addItem', {order: order});
+        // io.emit('addItem', 'second');
+        // this.$store.commit('changeHello', 'second');
+        console.log("ana honaaaa fi al ordering");
+        // this.ordertocart = this.$store.getters.getHello;
+        //set all counters to 0. Notice the use of $refs
+        for (i = 0; i < this.$refs.ingredient.length; i += 1) {
+            this.$refs.ingredient[i].resetCounter();
+        }
+        this.price = 0;
+        this.chosenIngredients = [];
+    },
   }
 }
+
+
 </script>
 <style scoped>
 /* scoped in the style tag means that these rules will only apply to elements, classes and ids in this template and no other templates. */

@@ -6,15 +6,21 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    socket: io()
+    socket: io(),
+    hello: "first"
   },
   getters: {
-    getSocket: state => state.socket
+    getSocket: state => state.socket,
+    getHello: state => state.hello
   },
   mutations: { //manipulating data in the store
-
+    changeHello(state, msg) {
+      state.hello = msg;
+    }
   },
   actions: {
-
+    changeHello({commit}, msg) {
+      commit('changeHello',msg)
+    }
   }
 })
